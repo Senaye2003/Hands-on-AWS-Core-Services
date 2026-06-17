@@ -1,25 +1,33 @@
-> **Note:** Please refer to the initial project requirements in the [itcs6190_aws_core_services.pdf](https://github.com/ITCS6190-Summer2026/Hands-on-AWS-Core-Services/blob/main/itcs6190_aws_core_services.pdf) file before proceeding with the configurations below.
+# Hands-on: AWS Core Services (S3, Glue, CloudWatch, Athena)
 
-## AWS Core Services Assignment Guide
+**ITCS 6190/8190 — Summer 2026**
+**Dataset:** [E-Commerce Sales Data](https://www.kaggle.com/datasets/thedevastator/unlock-profits-with-e-commerce-sales-data) — `Amazon Sale Report.csv`
 
-### 1. S3 Bucket Setup & Structure
-* **Global Uniqueness:** S3 bucket names must be globally unique across all AWS accounts. Append a unique identifier, such as your student ID or initials (e.g., `itcs6190-raw-data-[yourinitials]`).
-* **Recommended Structure:** Create either two separate buckets or one main bucket with two folders:
-  * `raw-data/` -> Upload your downloaded Kaggle CSV here.
-  * `processed-data/` -> Designate this for Athena query results.
+## Pipeline
 
-### 2. IAM Role Configuration
-To give your Glue Crawler permission to access your data, create an IAM Role with the following parameters:
-* **Trusted Entity Type:** AWS Service
-* **Service:** `Glue`
-* **Permissions Policies to Attach:**
-  * `AWSGlueServiceRole` (Provides basic crawler permissions)
-  * `AmazonS3ReadOnlyAccess` (Allows the crawler to read data from your S3 bucket)
+`S3 (raw-data/) → Glue Crawler → Data Catalog (raw_data) → Athena → S3 (processed-data/)`
 
-### 3. Glue Crawler Navigation (AWS Console)
-Because the AWS Console UI updates frequently, use the search bar at the top of the AWS Console to find **AWS Glue**:
-1. In the left sidebar, click on **Crawlers** under the *Data Catalog* section.
-2. Click **Create crawler**.
-3. Name your crawler and specify the S3 path to your `raw-data/` folder as the data store.
-4. Assign the IAM role created in the previous step.
-5. Configure the output to point to a database (create a new database if you don't have one yet).
+- **S3:** bucket `itcs6190-data-sweldebe` (us-east-2) with `raw-data/` (source CSV) and `processed-data/` (Athena output).
+- **IAM:** role `Glue-Crawler-Role-sweldebe` with `AWSGlueServiceRole` + `AmazonS3ReadOnlyAccess`.
+- **Glue:** crawler `itcs6190-crawler-sweldebe` → database `itcs6190_db_sweldebe`, table `raw_data` (24 columns).
+- **CloudWatch:** crawler run monitored via `/aws-glue/crawlers`.
+- **Athena:** ran the 5 queries; results saved to `processed-data/`.
+
+## Queries
+
+The 5 queries are in [`queries.sql`](queries.sql); results in [`results/`](results/).
+
+1. Basic table exploration (first 10 records)
+2. Orders by product category
+3. Revenue & quantity by fulfilment method
+4. Monthly sales trend
+5. Top 5 SKUs per category
+
+## Contents
+
+```
+README.md
+queries.sql
+results/        (5 CSVs)
+screenshots/    (s3_buckets.png, iam_role.png, cloudwatch.png)
+```
